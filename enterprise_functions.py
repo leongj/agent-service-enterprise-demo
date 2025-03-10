@@ -7,40 +7,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-
-
-# def fetch_datetime(
-#     format_str: str = "%Y-%m-%d %H:%M:%S",
-#     unix_ts: int | None = None,
-#     tz_offset_seconds: int | None = None
-# ) -> str:
-#     """
-#     Returns either the current UTC date/time in the given format, or if unix_ts
-#     is given, converts that timestamp to either UTC or local time (tz_offset_seconds).
-
-#     :param format_str: The strftime format, e.g. "%Y-%m-%d %H:%M:%S".
-#     :param unix_ts: Optional Unix timestamp. If provided, returns that specific time.
-#     :param tz_offset_seconds: If provided, shift the datetime by this many seconds from UTC.
-#     :return: A JSON string containing the "datetime" or an "error" key/value.
-#     """
-#     try:
-#         if unix_ts is not None:
-#             dt_utc = pydatetime.fromtimestamp(unix_ts, tz=timezone.utc)
-#         else:
-#             dt_utc = pydatetime.now(timezone.utc)
-
-#         if tz_offset_seconds is not None:
-#             local_tz = timezone(timedelta(seconds=tz_offset_seconds))
-#             dt_local = dt_utc.astimezone(local_tz)
-#             result_str = dt_local.strftime(format_str)
-#         else:
-#             result_str = dt_utc.strftime(format_str)
-
-#         return json.dumps({"datetime": result_str})
-#     except Exception as e:
-#         return json.dumps({"error": f"Exception: {str(e)}"})
-
 def get_leave_balance(employee_email: str) -> str:
     """
     Retrieves the current leave balance for an employee from the company's HR system.
@@ -107,14 +73,14 @@ def submit_leave_request(start_date: str, end_date: str, leave_type: str, employ
     # For now, just return a success message
     return json.dumps({
         "message": f"Leave request {request_id} submitted successfully",
-        "status": "pending"
+        "status": "Pending"
     })
 
 
 def get_employee_info(employee_email: str) -> str:
     """
     Retrieves employee information from the company's HR system.
-    Including: employee details, manager, and office location.
+    Including manager email and office location.
     
     :param employee_email: employee email address.
     :return: A JSON string with employee information or an "error" key.
@@ -152,50 +118,20 @@ def send_email(recipient: str, subject: str, body: str) -> str:
     :param body: The content within the email body.
     :return: A JSON string with either a "message" or an "error" key.
     """
-    # Retrieve the Logic App URL from the environment.
-    logic_app_url = os.getenv("LOGIC_APP_SEND_EMAIL_URL")
-    if not logic_app_url:
+
+    # Check the recipient email address = thivyruthra@microsoftdemo.com
+    if recipient != "thivyruthra@microsoftdemo.com":
         return json.dumps({
-            "error": "Logic App endpoint URL is not configured in the environment."
+            "error": "email address not found"
         })
     
-    # Construct the payload to match the Logic App's expected schema.
-    payload = {
-        "recipient": recipient,
-        "subject": subject,
-        "body": body
-    }
+    return json.dumps({
+        "message": f"Email sent to {recipient}."
+    })
     
-    try:
-        # Make the POST request to the Logic App.
-        response = requests.post(logic_app_url, json=payload)
-        response.raise_for_status()  # Raise an exception for any HTTP errors.
-        
-        # Attempt to parse the JSON response from the Logic App.
-        try:
-            response_data = response.json()
-        except Exception:
-            response_data = response.text
-        
-        return json.dumps({
-            "message": f"Email sent to {recipient}.",
-            "response": response_data
-        })
-    except requests.exceptions.HTTPError as http_err:
-        return json.dumps({
-            "error": f"HTTP error occurred: {http_err}",
-            "details": response.text
-        })
-    except Exception as e:
-        return json.dumps({
-            "error": f"An error occurred: {str(e)}"
-        })
-    
+
 # make functions callable a callable set from enterprise-streaming-agent.ipynb
 enterprise_fns: Set[Callable[..., Any]] = {
-    # fetch_datetime,
-    # fetch_weather,
-    # fetch_stock_price,
     get_leave_balance,
     submit_leave_request,
     get_employee_info,
