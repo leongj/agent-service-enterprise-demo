@@ -80,7 +80,7 @@ def submit_leave_request(start_date: str, end_date: str, leave_type: str, employ
 def get_employee_info(employee_email: str) -> str:
     """
     Retrieves employee information from the company's HR system.
-    Including manager email and office location.
+    Returns details such as the employee's manager name and email, and office location.
     
     :param employee_email: employee email address.
     :return: A JSON string with employee information or an "error" key.
@@ -111,7 +111,8 @@ def get_employee_info(employee_email: str) -> str:
 
 def send_email(recipient: str, subject: str, body: str) -> str:
     """
-    Sends an email to the user-instructed mailbox using an Azure Logic App HTTP trigger e.g., {"recipient":string,"subject":string,"body":string}).
+    Sends an email.
+    Always confirm the details with the user before sending the email.
     
     :param recipient: The email address to send the email to.
     :param subject: The subject line of the email.
